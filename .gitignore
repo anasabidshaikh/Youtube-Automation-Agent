@@ -1,0 +1,20 @@
+# n8n runtime
+**/.n8n/
+**/database.sqlite
+
+# credentials & secrets
+.env
+*.env
+
+# generated media
+/audio/*
+/videos/*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+powershell-commands.txt
