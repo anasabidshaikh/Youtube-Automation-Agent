@@ -10,14 +10,27 @@ while ($true) {
   $request = $context.Request
   $response = $context.Response
 
-  $query = $request.QueryString["q"]
-  if (-not $query) { $query = "viral shorts" }
+  $queryParam = $request.QueryString["q"]
+  if (-not $queryParam) {
+    $queries = @("viral shorts")
+  } else {
+    $queries = $queryParam.Split(",")
+  }
 
-  $output = powershell -ExecutionPolicy Bypass `
-    -File "D:\N8N Projects Workflows\Youtube-Automation-Agent\scripts\run_yt_trends.ps1" `
-    -query $query
+  $allResults = @()
 
-  $json = "[" + ($output -join ",") + "]"
+  foreach ($q in $queries) {
+    $output = powershell -ExecutionPolicy Bypass `
+      -File "D:\N8N Projects Workflows\Youtube-Automation-Agent\scripts\run_yt_trends.ps1" `
+      -query $q.Trim()
+
+    foreach ($line in $output) {
+      $allResults += $line
+    }
+  }
+
+  $json = "[" + ($allResults -join ",") + "]"
+
 
   $buffer = [System.Text.Encoding]::UTF8.GetBytes($json)
   $response.ContentLength64 = $buffer.Length

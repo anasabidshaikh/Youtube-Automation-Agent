@@ -1,0 +1,156 @@
+{
+  "name": "yt-trend-detection",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "538cb3f2-f813-45bd-bbec-b33c6e03772d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "68d6f6c7-075e-4139-b198-3368234eabee",
+              "name": "queries",
+              "value": "viral shorts,ai shorts,breaking news shorts,celebrity shorts",
+              "type": "string"
+            },
+            {
+              "id": "05378e36-1c6a-4478-a165-224d24cac874",
+              "name": "max_results",
+              "value": "30",
+              "type": "string"
+            },
+            {
+              "id": "90cacb31-c466-40ab-86fd-a0041b0c9c1a",
+              "name": "yt_dlp_path",
+              "value": "D:\\tools\\yt-dlp\\yt-dlp.exe",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "a539407b-2d74-4a47-b507-5ef50b78c573",
+      "name": "Set Trend Queries"
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:3333/?q={{ $json.queries }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "422d2c0a-ebb2-49d3-bb9a-36e1cf7a9ebb",
+      "name": "Fetch Trends (Local yt-dlp)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const v = item.json;\n\n  // fallback safety\n  const views = v.view_count || 0;\n  const duration = v.duration || 60;\n\n  // Shorts bias: short + views\n  const score = views / duration;\n\n  return {\n    json: {\n      ...v,\n      score\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "dfdc7158-0e63-4d3f-a71e-bd0c2e862f8b",
+      "name": "Score Trend Candidates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sorted = items\n  .sort((a, b) => b.json.score - a.json.score);\n\nreturn [sorted[0]];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "ed8d3e9f-5621-4702-ab9a-31508087c02f",
+      "name": "Select Top Trend"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Trend Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Trend Queries": {
+      "main": [
+        [
+          {
+            "node": "Fetch Trends (Local yt-dlp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Trends (Local yt-dlp)": {
+      "main": [
+        [
+          {
+            "node": "Score Trend Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Trend Candidates": {
+      "main": [
+        [
+          {
+            "node": "Select Top Trend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "3c0311eb-5390-4482-985c-c40d13942472",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "089294f0e60820f8640ebe4ea3d16aada0515df3b33f7314a6624da8dcbe9e9a"
+  },
+  "id": "b3QIkQ663DeulG_bzX5pX",
+  "tags": []
+}
