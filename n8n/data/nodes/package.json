@@ -2,6 +2,7 @@
   "name": "installed-nodes",
   "private": true,
   "dependencies": {
-    "n8n-nodes-cronlytic": "0.1.4"
+    "n8n-nodes-cronlytic": "0.1.4",
+    "n8n-nodes-fs": "1.0.3"
   }
 }
